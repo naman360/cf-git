@@ -32,18 +32,12 @@ function createGitDirectory() {
   );
 
   console.log("Initialized git directory");
-  async function catFile(hash) {
-    const content = await fs.readFileSync(
-      path.join(
-        process.cwd(),
-        ".git",
-        "objects",
-        hash.slice(0, 2),
-        hash.slice(2)
-      )
-    );
-    const dataUnzipped = zlib.inflateSync(content);
-    const res = dataUnzipped.toString().split("\0")[1];
-    process.stdout.write(res);
-  }
+}
+async function catFile(hash) {
+  const content = await fs.readFileSync(
+    path.join(process.cwd(), ".git", "objects", hash.slice(0, 2), hash.slice(2))
+  );
+  const dataUnzipped = zlib.inflateSync(content);
+  const res = dataUnzipped.toString().split("\0")[1];
+  process.stdout.write(res);
 }
