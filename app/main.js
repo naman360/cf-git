@@ -32,8 +32,8 @@ function createGitDirectory() {
   );
 
   console.log("Initialized git directory");
-  function catFile(hash) {
-    const content = fs.readFileSync(
+  async function catFile(hash) {
+    const content = await fs.readFileSync(
       path.join(
         process.cwd(),
         ".git",
@@ -42,8 +42,8 @@ function createGitDirectory() {
         hash.slice(2)
       )
     );
-    const decompressedData = zlib.inflateSync(content);
-    const output = decompressedData.split("\0")[1];
-    process.stdout.write(output);
+    const dataUnzipped = zlib.inflateSync(content);
+    const res = dataUnzipped.toString().split("\0")[1];
+    process.stdout.write(res);
   }
 }
