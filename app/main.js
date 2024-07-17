@@ -13,6 +13,7 @@ switch (command) {
     break;
   case "cat-file":
     const hash = process.argv[4];
+    console.log(hash);
     catFile(hash);
     break;
   default:
