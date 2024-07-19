@@ -21,6 +21,10 @@ switch (command) {
     const fileName = process.argv[4];
     createBlob(fileName);
     break;
+  case "ls-tree":
+    const treeHash = process.argv[4];
+    readTree();
+    break;
   default:
     throw new Error(`Unknown command ${command}`);
 }
@@ -63,4 +67,45 @@ function createBlob(fileName) {
   fs.mkdirSync(hashDirPath, { recursive: true });
   fs.writeFileSync(filePath, zlib.deflateSync(data));
   process.stdout.write(hash);
+}
+
+function readTree() {
+  const isNameOnly = process.argv[3];
+  let hash = "";
+  if (isNameOnly === "--name-only") {
+    //display the name only
+    hash = process.argv[4];
+  } else {
+    hash = process.argv[3];
+  }
+  const dirName = hash.slice(0, 2);
+  const fileName = hash.slice(2);
+  const objectPath = path.join(
+    process.cwd(),
+    ".git",
+    "objects",
+    dirName,
+    fileName
+  );
+  const dataFromFile = fs.readFileSync(objectPath);
+  //decrypt the data from the file
+  const inflated = zlib.inflateSync(dataFromFile);
+  //notice before encrypting the data what we do was we encrypt
+  //blob length/x00 so to get the previous string back what we need to do is split with /xoo
+  const enteries = inflated.toString("utf-8").split("\x00");
+  //enteries will be [blob length/x00, actual_file_content]
+  const dataFromTree = enteries.slice(1);
+
+  const names = dataFromTree
+    .filter((line) => {
+      return line.includes(" ");
+    })
+    .map((line) => {
+      return line.split(" ")[1];
+    });
+
+  const namesString = names.join("\n");
+  const response = namesString.concat("\n");
+  //this is the regex pattern that tells to replace multiple global \n with single \n
+  process.stdout.write(response.replace(/\n\n/g, "\n"));
 }
